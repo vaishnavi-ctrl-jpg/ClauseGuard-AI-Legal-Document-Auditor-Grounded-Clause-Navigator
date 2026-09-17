@@ -1,0 +1,73 @@
+// ==============================================================================
+// ClauseGuard: Counter-Proposal & Negotiation API Route (/api/negotiate)
+// ==============================================================================
+
+import { NextRequest, NextResponse } from 'next/server';
+import { defaultRateLimiter } from '@/lib/security';
+import { getLegalAiProvider } from '@/lib/ai/factory';
+import { CounterProposal } from '@/lib/types';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+export async function POST(req: NextRequest) {
+  const startTime = Date.now();
+
+  try {
+    const clientIp =
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      req.headers.get('x-real-ip') ||
+      'anonymous-client';
+
+    const rateLimit = await defaultRateLimiter.check(clientIp);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Rate limit exceeded. Please wait a moment before requesting another counter-proposal.',
+          retryAfter: rateLimit.resetSeconds,
+        },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateLimit.resetSeconds) },
+        }
+      );
+    }
+
+    const body = await req.json().catch(() => null);
+    if (!body || !body.clauseTitle || !body.originalClause) {
+      return NextResponse.json(
+        { error: 'Missing required parameters: clauseTitle and originalClause.' },
+        { status: 400 }
+      );
+    }
+
+    const provider = getLegalAiProvider();
+    const rawProposal = await provider.draftCounterProposal(
+      String(body.clauseTitle).slice(0, 200),
+      String(body.originalClause).slice(0, 3000),
+      String(body.potentialRisk || '').slice(0, 1000)
+    );
+
+    const latencyMs = Date.now() - startTime;
+
+    const responseData: CounterProposal = {
+      clauseId: body.clauseId || 'counter-1',
+      clauseTitle: rawProposal.clauseTitle || body.clauseTitle,
+      originalClause: rawProposal.originalClause || body.originalClause,
+      revisedFairClause: rawProposal.revisedFairClause,
+      rationale: rawProposal.rationale,
+      readyToSendDraft: rawProposal.readyToSendDraft,
+      metadata: {
+        engineName: provider.engineName,
+        isDemo: provider.isDemo,
+        latencyMs,
+      },
+    };
+
+    return NextResponse.json(responseData, { status: 200 });
+  } catch (error: unknown) {
+    console.error('Error in /api/negotiate:', error);
+    const message = error instanceof Error ? error.message : 'Internal server error drafting counter-proposal.';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
