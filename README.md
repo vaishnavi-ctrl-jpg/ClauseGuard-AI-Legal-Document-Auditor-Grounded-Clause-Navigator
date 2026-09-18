@@ -47,7 +47,7 @@ graph TD
 | **Contract Audit Engine** | **Google Gemini 1.5 Flash** (fallback: `gemini-1.5-pro`) | `temperature: 0.1`, structured JSON schema enforcement, exact verbatim quote extraction directive | `/api/analyze` $\rightarrow$ `src/lib/ai/geminiProvider.ts:analyzeDocument()` |
 | **Negotiation Drafter** | **Google Gemini 1.5 Flash** | `temperature: 0.2`, legal reciprocity framing, polite tone synthesis | `/api/negotiate` $\rightarrow$ `src/lib/ai/geminiProvider.ts:draftCounterProposal()` |
 | **Grounded Document Q&A** | **Google Gemini 1.5 Flash** | `temperature: 0.1`, zero-hallucination constraint, mandatory quote extraction | `/api/chat` $\rightarrow$ `src/lib/ai/geminiProvider.ts:answerQuestion()` |
-| **Citation Grounding Layer** | **Indexed Deterministic Verifier** (Non-LLM algorithmic guardrail) | $O(1)$ to $O(K)$ token pre-indexed Jaccard & substring matching | `src/lib/groundingVerifier.ts` |
+| **Citation Grounding Layer** | **Indexed Deterministic Verifier** (Non-LLM algorithmic guardrail) | $O(1)$ to $O(K)$ token pre-indexed recall & substring matching | `src/lib/groundingVerifier.ts` |
 | **Demo / Evaluation Fallback** | **Disclosed Mock Provider** | Deterministic evaluation engine with loud amber disclosure banners | `src/lib/ai/mockProvider.ts` |
 
 ---
@@ -55,6 +55,8 @@ graph TD
 ## 3. Evaluation Criteria Alignment
 
 ### 🛡️ 1. Security & Resilience
+- **Patched Production Runtime:** Upgraded to `next@15.5.24` with zero runtime vulnerabilities in the request path; all residual `npm audit` warnings reside strictly within dev/build-time tooling (`vitest`/`postcss`) and are never bundled into the deployed application.
+- **HTTP Status Taxonomy:** Maps errors into semantic HTTP status codes (`401 Unauthorized`, `429 Too Many Requests`, `504 Gateway Timeout`, `500 Server Error`) via `src/lib/apiError.ts`.
 - **Zero Client-Side Secret Leakage:** All API interactions occur in server-side Next.js route handlers (`nodejs` runtime). The Gemini API key is never exposed to the client.
 - **Input Sanitization & Injection Defense:** `sanitizeLegalText()` strips non-printable control characters, enforces 20–75,000 character boundaries, and detects adversarial prompt injection patterns (`ignore previous instructions`, `system prompt override`).
 - **Pluggable Sliding-Window Rate Limiting:** Throttles incoming requests per IP (20 requests/minute) returning standard `HTTP 429 Too Many Requests` with `Retry-After` headers. (Single-instance in-memory by default; documented Upstash Redis adapter pattern for serverless).
