@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { defaultRateLimiter } from '@/lib/security';
 import { getLegalAiProvider } from '@/lib/ai/factory';
 import { CounterProposal } from '@/lib/types';
+import { mapErrorToResponse } from '@/lib/apiError';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(responseData, { status: 200 });
   } catch (error: unknown) {
     console.error('Error in /api/negotiate:', error);
-    const message = error instanceof Error ? error.message : 'Internal server error drafting counter-proposal.';
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { message, statusCode } = mapErrorToResponse(error);
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }

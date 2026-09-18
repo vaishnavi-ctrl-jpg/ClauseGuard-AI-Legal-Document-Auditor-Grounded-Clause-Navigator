@@ -105,3 +105,29 @@ Landlord reserves the right to enter the leased premises at any time without pri
     expect(Array.isArray(json.citations)).toBe(true);
   });
 });
+
+describe('API Error Mapping (Auth, Quota, Timeout taxonomy)', () => {
+  it('maps 429 quota exhaustion messages to HTTP 429', async () => {
+    const { mapErrorToResponse } = await import('@/lib/apiError');
+    const result = mapErrorToResponse(new Error('Gemini Quota Exceeded (HTTP 429): RESOURCE_EXHAUSTED'));
+    expect(result.statusCode).toBe(429);
+  });
+
+  it('maps auth errors to HTTP 401', async () => {
+    const { mapErrorToResponse } = await import('@/lib/apiError');
+    const result = mapErrorToResponse(new Error('Gemini Authentication Error: Invalid or expired API Key'));
+    expect(result.statusCode).toBe(401);
+  });
+
+  it('maps request timeouts to HTTP 504', async () => {
+    const { mapErrorToResponse } = await import('@/lib/apiError');
+    const result = mapErrorToResponse(new Error('Gemini API request timed out after 30 seconds'));
+    expect(result.statusCode).toBe(504);
+  });
+
+  it('maps unknown errors to HTTP 500', async () => {
+    const { mapErrorToResponse } = await import('@/lib/apiError');
+    const result = mapErrorToResponse(new Error('Unexpected system error'));
+    expect(result.statusCode).toBe(500);
+  });
+});

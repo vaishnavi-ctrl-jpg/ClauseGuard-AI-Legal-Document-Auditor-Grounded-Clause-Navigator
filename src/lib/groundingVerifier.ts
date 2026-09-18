@@ -84,7 +84,7 @@ export class IndexedDocumentVerifier {
       }
     }
 
-    // 3. Pre-Indexed Token Overlap Verification (Jaccard Similarity over pre-computed sets)
+    // 3. Pre-Indexed Token Overlap Verification (Quote Recall / Token Coverage)
     const quoteTokens = extractSignificantTokens(normQuote);
     if (quoteTokens.size === 0) {
       return {
@@ -107,8 +107,8 @@ export class IndexedDocumentVerifier {
         }
       });
 
-      const union = quoteTokens.size + line.tokens.size - intersection;
-      const score = union > 0 ? intersection / quoteTokens.size : 0; // Focus on how much of the quote's intent is captured
+      // Quote Recall: measures the fraction of the quote's key terms present in this candidate line
+      const score = quoteTokens.size > 0 ? intersection / quoteTokens.size : 0;
 
       if (score > bestScore) {
         bestScore = score;

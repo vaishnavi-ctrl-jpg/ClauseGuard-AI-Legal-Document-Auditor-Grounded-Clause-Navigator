@@ -7,6 +7,7 @@ import { defaultRateLimiter, sanitizeLegalText } from '@/lib/security';
 import { getLegalAiProvider } from '@/lib/ai/factory';
 import { IndexedDocumentVerifier } from '@/lib/groundingVerifier';
 import { GroundedCitation } from '@/lib/types';
+import { mapErrorToResponse } from '@/lib/apiError';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest) {
     );
   } catch (error: unknown) {
     console.error('Error in /api/chat:', error);
-    const message = error instanceof Error ? error.message : 'Internal server error answering question.';
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { message, statusCode } = mapErrorToResponse(error);
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }
