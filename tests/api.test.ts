@@ -44,6 +44,10 @@ This Agreement shall be governed by and construed in accordance with the laws of
     expect(json.clauses.length).toBeGreaterThan(0);
     expect(json.metadata.engineName).toBeDefined();
 
+    // Verify efficiency and latency observability headers
+    expect(res.headers.get('Cache-Control')).toBe('no-store, max-age=0');
+    expect(res.headers.get('Server-Timing')).toMatch(/ai;dur=\d+/);
+
     // Verify grounding verification chips are attached
     const firstClause = json.clauses[0];
     expect(firstClause.citation).toBeDefined();

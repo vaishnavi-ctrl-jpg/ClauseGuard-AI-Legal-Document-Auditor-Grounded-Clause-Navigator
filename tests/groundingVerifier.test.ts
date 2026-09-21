@@ -61,4 +61,13 @@ The security deposit shall be held by Landlord and returned within thirty days.
     const shortResult = verifier.verify('Rent');
     expect(shortResult.status).toBe('UNVERIFIED');
   });
+
+  it('serves repeated citations from the O(1) memoization cache with identical reference', () => {
+    const quote = 'SECTION 3: SECURITY DEPOSIT';
+    const firstCall = verifier.verify(quote);
+    const secondCall = verifier.verify(quote);
+
+    expect(firstCall.status).toBe('VERIFIED');
+    expect(secondCall).toBe(firstCall); // Exact same object reference returned from O(1) cache
+  });
 });

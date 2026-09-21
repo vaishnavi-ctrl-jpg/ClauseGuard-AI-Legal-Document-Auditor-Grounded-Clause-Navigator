@@ -112,6 +112,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(responseData, {
       status: 200,
       headers: {
+        'Cache-Control': 'no-store, max-age=0',
+        'Server-Timing': `ai;dur=${latencyMs}`,
         'X-RateLimit-Limit': String(rateLimit.limit),
         'X-RateLimit-Remaining': String(rateLimit.remaining),
       },

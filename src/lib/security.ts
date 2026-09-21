@@ -97,6 +97,7 @@ export class MemoryRateLimiter implements RateLimiter {
   private timestamps: Map<string, number[]> = new Map();
   private readonly maxRequests: number;
   private readonly windowMs: number;
+  private lastCleanup: number = 0;
 
   constructor(maxRequests = 20, windowMs = 60 * 1000) {
     this.maxRequests = maxRequests;
@@ -125,8 +126,9 @@ export class MemoryRateLimiter implements RateLimiter {
     validTimestamps.push(now);
     this.timestamps.set(identifier, validTimestamps);
 
-    // Periodic cleanup of stale keys
-    if (this.timestamps.size > 1000) {
+    // Amortized O(1) cleanup: throttled sweep of stale client records every 30s
+    if (this.timestamps.size > 500 && now - this.lastCleanup > 30_000) {
+      this.lastCleanup = now;
       for (const [key, times] of this.timestamps.entries()) {
         const fresh = times.filter((t: number) => t > windowStart);
         if (fresh.length === 0) {

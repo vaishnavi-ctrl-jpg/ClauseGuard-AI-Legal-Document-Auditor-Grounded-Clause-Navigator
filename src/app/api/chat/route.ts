@@ -13,6 +13,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
+
   try {
     const clientIp =
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
@@ -66,6 +68,8 @@ export async function POST(req: NextRequest) {
       verifier.verify(quote)
     );
 
+    const latencyMs = Date.now() - startTime;
+
     return NextResponse.json(
       {
         answer: rawAnswer.answer,
@@ -74,7 +78,15 @@ export async function POST(req: NextRequest) {
         isDemo: provider.isDemo,
         timestamp: new Date().toISOString(),
       },
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store, max-age=0',
+          'Server-Timing': `ai;dur=${latencyMs}`,
+          'X-RateLimit-Limit': String(rateLimit.limit),
+          'X-RateLimit-Remaining': String(rateLimit.remaining),
+        },
+      }
     );
   } catch (error: unknown) {
     console.error('Error in /api/chat:', error);
