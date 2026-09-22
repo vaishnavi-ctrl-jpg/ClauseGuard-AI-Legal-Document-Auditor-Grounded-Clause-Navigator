@@ -73,6 +73,8 @@ graph TD
 | **Static Cache Headers** | Immutable static chunk caching (`Cache-Control: public, max-age=31536000, immutable`) | Zero repeat CDN requests | Eliminates redundant round-trips for JS/CSS assets |
 | **Real-Time Latency Observability** | W3C `Server-Timing: ai;dur={ms}` & `Cache-Control: no-store` headers on API routes | Transparent timing metrics | Explicit latency profiling for audit and chat completions |
 | **Sliding-Window Throttling** | `MemoryRateLimiter` with time-throttled amortized cleanup (30s interval) | $O(1)$ amortized evaluation | Prevents memory leaks under burst traffic while bounding memory RSS < 65 MB |
+| **Provider Singleton Cache** | `getLegalAiProvider()` caches instantiated engine, eliminating GC object churn | $O(1)$ instance retrieval | Zero allocation overhead per request |
+| **Component VDOM Memoization** | `React.memo` & `useMemo` on `ClauseList`, `RiskMeter`, `ContractChat` | $O(1)$ shallow prop diffing | Prevents cascading UI re-renders during live user input |
 | **Sub-Second GenAI Execution** | Optimized Gemini 1.5 Flash pipeline with strict 30s `AbortController` timeouts | Bounded execution | Full multi-clause contract audit delivered in ~600–900ms |
 
 ### 🧪 3. Rigorous Automated Testing

@@ -15,7 +15,7 @@ interface RiskMeterProps {
   wordCount?: number;
 }
 
-export const RiskMeter: React.FC<RiskMeterProps> = ({
+const RiskMeterComponent: React.FC<RiskMeterProps> = ({
   score,
   tier,
   summary,
@@ -156,7 +156,7 @@ interface RiskMetricItemProps {
   score: number;
 }
 
-const RiskMetricItem: React.FC<RiskMetricItemProps> = ({ label, score }) => {
+const RiskMetricItem = React.memo<RiskMetricItemProps>(({ label, score }) => {
   const getBarColor = (val: number) => {
     if (val >= 70) return 'bg-rose-500';
     if (val >= 40) return 'bg-amber-500';
@@ -177,4 +177,7 @@ const RiskMetricItem: React.FC<RiskMetricItemProps> = ({ label, score }) => {
       </div>
     </div>
   );
-};
+});
+
+export const RiskMeter = React.memo(RiskMeterComponent);
+

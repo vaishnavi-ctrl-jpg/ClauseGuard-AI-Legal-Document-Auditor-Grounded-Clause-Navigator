@@ -10,7 +10,7 @@ interface ContractChatProps {
   contractText: string;
 }
 
-export const ContractChat: React.FC<ContractChatProps> = ({ contractText }) => {
+const ContractChatComponent: React.FC<ContractChatProps> = ({ contractText }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'init-1',
@@ -274,3 +274,6 @@ const CitationStatusBadge: React.FC<{ citation: GroundedCitation }> = ({ citatio
     </span>
   );
 };
+
+export const ContractChat = React.memo(ContractChatComponent);
+

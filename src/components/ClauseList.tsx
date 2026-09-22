@@ -2,7 +2,7 @@
 // ClauseGuard: Filterable Clause List with Grounded Citation Chips
 // ==============================================================================
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ShieldAlert,
   AlertTriangle,
@@ -23,20 +23,24 @@ interface ClauseListProps {
   onDraftCounter: (clause: ClauseItem) => void;
 }
 
-export const ClauseList: React.FC<ClauseListProps> = ({ clauses, onDraftCounter }) => {
+const ClauseListComponent: React.FC<ClauseListProps> = ({ clauses, onDraftCounter }) => {
   const [filterRisk, setFilterRisk] = useState<'ALL' | RiskLevel>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<Record<string, 'plain' | 'original'>>({});
 
-  const filteredClauses = clauses.filter((c) => {
-    const matchesRisk = filterRisk === 'ALL' || c.riskLevel === filterRisk;
-    const matchesSearch =
-      searchQuery === '' ||
-      c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.plainEnglishExplanation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.legaleseSnippet.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesRisk && matchesSearch;
-  });
+  const filteredClauses = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return clauses.filter((c) => {
+      const matchesRisk = filterRisk === 'ALL' || c.riskLevel === filterRisk;
+      if (!matchesRisk) return false;
+      if (!query) return true;
+      return (
+        c.title.toLowerCase().includes(query) ||
+        c.plainEnglishExplanation.toLowerCase().includes(query) ||
+        c.legaleseSnippet.toLowerCase().includes(query)
+      );
+    });
+  }, [clauses, filterRisk, searchQuery]);
 
   const toggleTab = (clauseId: string, tab: 'plain' | 'original') => {
     setActiveTab((prev) => ({ ...prev, [clauseId]: tab }));
@@ -271,3 +275,6 @@ const CitationChip: React.FC<CitationChipProps> = ({ citation }) => {
     </div>
   );
 };
+
+export const ClauseList = React.memo(ClauseListComponent);
+
