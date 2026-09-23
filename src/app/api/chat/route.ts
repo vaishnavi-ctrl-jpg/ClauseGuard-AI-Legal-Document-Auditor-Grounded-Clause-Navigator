@@ -9,6 +9,7 @@ import { IndexedDocumentVerifier } from '@/lib/groundingVerifier';
 import { GroundedCitation } from '@/lib/types';
 import { mapErrorToResponse } from '@/lib/apiError';
 import { chatCache, hashPayload } from '@/lib/cache';
+import { ChatRequestSchema } from '@/lib/validators';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -36,13 +37,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json().catch(() => null);
-    if (!body || !body.contractText || !body.question) {
+    const rawBody = await req.json().catch(() => null);
+    const parsed = ChatRequestSchema.safeParse(rawBody);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Missing required fields: "contractText" and "question".' },
+        { error: parsed.error.errors[0]?.message || 'Missing or invalid fields: "contractText" and "question".' },
         { status: 400 }
       );
     }
+    const body = parsed.data;
 
     const validation = sanitizeLegalText(body.contractText);
     if (!validation.valid) {
@@ -52,13 +55,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const question = String(body.question).trim().slice(0, 500);
-    if (question.length < 3) {
-      return NextResponse.json(
-        { error: 'Question is too short.' },
-        { status: 400 }
-      );
-    }
+    const question = body.question.trim();
 
     const cacheKey = hashPayload(`${validation.sanitized}::${question}`);
     const cachedChat = chatCache.get(cacheKey);

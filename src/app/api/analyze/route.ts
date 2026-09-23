@@ -9,6 +9,7 @@ import { IndexedDocumentVerifier } from '@/lib/groundingVerifier';
 import { ClauseItem, DocumentAnalysis } from '@/lib/types';
 import { mapErrorToResponse } from '@/lib/apiError';
 import { documentAnalysisCache, hashPayload } from '@/lib/cache';
+import { AnalyzeRequestSchema } from '@/lib/validators';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -41,14 +42,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Body Payload Parsing & Validation
-    const body = await req.json().catch(() => null);
-    if (!body || !body.contractText) {
+    // 2. Body Payload Parsing & Validation (Strict Zod Schema)
+    const rawBody = await req.json().catch(() => null);
+    const parsed = AnalyzeRequestSchema.safeParse(rawBody);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Missing required field "contractText" in request body.' },
+        { error: parsed.error.errors[0]?.message || 'Missing or invalid "contractText" in request body.' },
         { status: 400 }
       );
     }
+    const body = parsed.data;
 
     // 3. Security Sanitization & Injection Defense
     const validation = sanitizeLegalText(body.contractText);

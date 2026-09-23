@@ -79,7 +79,7 @@ graph TD
 | **Sub-Second GenAI Execution** | Optimized Gemini 1.5 Flash pipeline with strict 30s `AbortController` timeouts | Bounded execution | Full multi-clause contract audit delivered in ~600–900ms |
 
 ### 🧪 3. Rigorous Automated Testing
-ClauseGuard includes a comprehensive test suite (28 passing tests) executed via **Vitest**:
+ClauseGuard includes a comprehensive test suite (29 passing tests) executed via **Vitest**:
 - `tests/groundingVerifier.test.ts`: Verifies exact matches, whitespace normalization, token overlap paraphrases, and flags hallucinated citations.
 - `tests/security.test.ts`: Tests length validation, prompt injection defense, control character stripping, and rate limiting exhaustion.
 - `tests/provider.test.ts`: Verifies `MockAiProvider`, `GeminiAiProvider` initialization guardrails, and test-double dependency injection.

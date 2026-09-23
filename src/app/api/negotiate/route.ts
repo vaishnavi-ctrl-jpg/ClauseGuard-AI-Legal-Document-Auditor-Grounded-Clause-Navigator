@@ -8,6 +8,7 @@ import { getLegalAiProvider } from '@/lib/ai/factory';
 import { CounterProposal } from '@/lib/types';
 import { mapErrorToResponse } from '@/lib/apiError';
 import { negotiationCache, hashPayload } from '@/lib/cache';
+import { NegotiateRequestSchema } from '@/lib/validators';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -35,13 +36,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json().catch(() => null);
-    if (!body || !body.clauseTitle || !body.originalClause) {
+    const rawBody = await req.json().catch(() => null);
+    const parsed = NegotiateRequestSchema.safeParse(rawBody);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Missing required parameters: clauseTitle and originalClause.' },
+        { error: parsed.error.errors[0]?.message || 'Missing required parameters: clauseTitle and originalClause.' },
         { status: 400 }
       );
     }
+    const body = parsed.data;
 
     const cacheKey = hashPayload(`${body.clauseTitle}::${body.originalClause}::${body.potentialRisk || ''}`);
     const cachedProposal = negotiationCache.get(cacheKey);

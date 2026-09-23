@@ -7,6 +7,7 @@ import { MockAiProvider } from '@/lib/ai/mockProvider';
 import { GeminiAiProvider } from '@/lib/ai/geminiProvider';
 import { getLegalAiProvider, setProviderOverrideForTests } from '@/lib/ai/factory';
 import { LegalAiProvider } from '@/lib/ai/provider';
+import { SAMPLE_CONTRACTS } from '@/lib/sampleContracts';
 
 describe('MockAiProvider (Demo / Offline Engine)', () => {
   const mockProvider = new MockAiProvider();
@@ -47,6 +48,15 @@ describe('MockAiProvider (Demo / Offline Engine)', () => {
     const res = await mockProvider.answerQuestion('Landlord entry clause...', 'Can landlord enter without notice?');
     expect(res.answer).toBeDefined();
     expect(Array.isArray(res.citedQuotes)).toBe(true);
+  });
+
+  it('analyzes diverse realistic contract domains from SAMPLE_CONTRACTS', async () => {
+    for (const contract of SAMPLE_CONTRACTS) {
+      const analysis = await mockProvider.analyzeDocument(contract.text);
+      expect(analysis.clauses.length).toBeGreaterThan(0);
+      expect(analysis.overallRiskScore).toBeGreaterThanOrEqual(0);
+      expect(analysis.riskTier).toBeDefined();
+    }
   });
 });
 

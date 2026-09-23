@@ -5,6 +5,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X, Copy, Check, Sparkles, Send, ShieldCheck, Clock } from 'lucide-react';
 import { ClauseItem, CounterProposal } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 interface NegotiationModalProps {
   clause: ClauseItem | null;
@@ -150,14 +151,14 @@ export const NegotiationModal: React.FC<NegotiationModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+      className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto")}
       role="dialog"
       aria-modal="true"
       aria-labelledby="counter-modal-title"
     >
       <div
         ref={modalRef}
-        className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full p-6 space-y-5 my-8 max-h-[90vh] overflow-y-auto"
+        className={cn("bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full p-6 space-y-5 my-8 max-h-[90vh] overflow-y-auto")}
       >
         {/* Modal Header */}
         <div className="flex items-start justify-between border-b border-slate-100 pb-4">
