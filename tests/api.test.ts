@@ -7,6 +7,7 @@ import { POST as analyzeHandler } from '@/app/api/analyze/route';
 import { POST as negotiateHandler } from '@/app/api/negotiate/route';
 import { POST as chatHandler } from '@/app/api/chat/route';
 import { NextRequest } from 'next/server';
+import { MemoryResponseCache } from '@/lib/cache';
 
 describe('API Route: /api/analyze', () => {
   it('returns 400 when body has missing contractText', async () => {
@@ -156,5 +157,23 @@ describe('API Error Mapping (Auth, Quota, Timeout taxonomy)', () => {
     const { mapErrorToResponse } = await import('@/lib/apiError');
     const result = mapErrorToResponse(new Error('Unexpected system error'));
     expect(result.statusCode).toBe(500);
+  });
+});
+
+describe('MemoryResponseCache (True LRU Eviction & TTL Semantics)', () => {
+  it('correctly implements true LRU eviction (accessing an item prevents its eviction)', () => {
+    const cache = new MemoryResponseCache<string>(60000, 2); // capacity = 2
+    cache.set('a', 'alpha');
+    cache.set('b', 'beta');
+
+    // Access 'a', making 'b' the least recently used
+    expect(cache.get('a')).toBe('alpha');
+
+    // Insert 'c', which should evict 'b' (not 'a', even though 'a' was inserted first)
+    cache.set('c', 'gamma');
+
+    expect(cache.get('a')).toBe('alpha'); // preserved because it was recently accessed
+    expect(cache.get('b')).toBeNull();    // evicted because it was least recently used
+    expect(cache.get('c')).toBe('gamma'); // newly inserted
   });
 });

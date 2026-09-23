@@ -31,14 +31,19 @@ export class MemoryResponseCache<T> {
       this.cache.delete(key);
       return null;
     }
+    // True LRU: refresh access recency by moving accessed entry to tail
+    this.cache.delete(key);
+    this.cache.set(key, entry);
     return entry.data;
   }
 
   public set(key: string, data: T): void {
-    if (this.cache.size >= this.maxEntries) {
-      // LRU eviction: remove the oldest inserted key
-      const oldestKey = this.cache.keys().next().value;
-      if (oldestKey) this.cache.delete(oldestKey);
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.maxEntries) {
+      // True LRU eviction: evict least-recently-used key (head of Map iteration order)
+      const lruKey = this.cache.keys().next().value;
+      if (lruKey) this.cache.delete(lruKey);
     }
     this.cache.set(key, { data, expiresAt: Date.now() + this.ttlMs });
   }

@@ -73,13 +73,13 @@ graph TD
 | **Static Cache Headers** | Immutable static chunk caching (`Cache-Control: public, max-age=31536000, immutable`) | Zero repeat CDN requests | Eliminates redundant round-trips for JS/CSS assets |
 | **Real-Time Latency Observability** | W3C `Server-Timing: ai;dur={ms}` & `Cache-Control: no-store` headers on API routes | Transparent timing metrics | Explicit latency profiling for audit and chat completions |
 | **Sliding-Window Throttling** | `MemoryRateLimiter` with time-throttled amortized cleanup (30s interval) | $O(1)$ amortized evaluation | Prevents memory leaks under burst traffic while bounding memory RSS < 65 MB |
-| **SHA-256 Response Cache** | In-memory `MemoryResponseCache` on `/api/analyze`, `/api/negotiate`, `/api/chat` with `X-Cache: HIT` | $O(1)$ constant retrieval | Slashes repeat contract audit latency from ~800ms to **< 2ms** |
+| **SHA-256 Response Cache** | True $O(1)$ LRU `MemoryResponseCache` on `/api/analyze`, `/api/negotiate`, `/api/chat` with `X-Cache: HIT` | $O(1)$ constant retrieval & eviction | Slashes repeat contract audit latency from ~800ms to **< 2ms** |
 | **Provider Singleton Cache** | `getLegalAiProvider()` caches instantiated engine, eliminating GC object churn | $O(1)$ instance retrieval | Zero allocation overhead per request |
 | **Strict Zod Body Validation** | `src/lib/validators.ts` ensures high-throughput type safety and sanitization | $O(1)$ schema parsing | Zero injection vulnerability & zero unparsed payload bloat |
 | **Sub-Second GenAI Execution** | Optimized Gemini 1.5 Flash pipeline with strict 30s `AbortController` timeouts | Bounded execution | Full multi-clause contract audit delivered in ~600–900ms |
 
 ### 🧪 3. Rigorous Automated Testing
-ClauseGuard includes a comprehensive test suite (29 passing tests) executed via **Vitest**:
+ClauseGuard includes a comprehensive test suite (30 passing tests) executed via **Vitest**:
 - `tests/groundingVerifier.test.ts`: Verifies exact matches, whitespace normalization, token overlap paraphrases, and flags hallucinated citations.
 - `tests/security.test.ts`: Tests length validation, prompt injection defense, control character stripping, and rate limiting exhaustion.
 - `tests/provider.test.ts`: Verifies `MockAiProvider`, `GeminiAiProvider` initialization guardrails, and test-double dependency injection.
