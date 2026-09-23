@@ -8,6 +8,7 @@ import { getLegalAiProvider } from '@/lib/ai/factory';
 import { IndexedDocumentVerifier } from '@/lib/groundingVerifier';
 import { ClauseItem, DocumentAnalysis } from '@/lib/types';
 import { mapErrorToResponse } from '@/lib/apiError';
+import { documentAnalysisCache, hashPayload } from '@/lib/cache';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -60,8 +61,35 @@ export async function POST(req: NextRequest) {
 
     const sanitizedText = validation.sanitized;
     const wordCount = sanitizedText.split(/\s+/).filter(Boolean).length;
+    const cacheKey = hashPayload(sanitizedText);
 
-    // 4. Execution via Injected Legal AI Provider
+    // 4. Instant O(1) Cache Hit Evaluation
+    const cachedData = documentAnalysisCache.get(cacheKey);
+    if (cachedData) {
+      const cacheLatency = Date.now() - startTime;
+      return NextResponse.json(
+        {
+          ...cachedData,
+          metadata: {
+            ...cachedData.metadata,
+            latencyMs: cacheLatency,
+            cached: true,
+          },
+        },
+        {
+          status: 200,
+          headers: {
+            'X-Cache': 'HIT',
+            'Cache-Control': 'no-store, max-age=0',
+            'Server-Timing': `ai;dur=${cacheLatency};desc="cache-hit"`,
+            'X-RateLimit-Limit': String(rateLimit.limit),
+            'X-RateLimit-Remaining': String(rateLimit.remaining),
+          },
+        }
+      );
+    }
+
+    // 5. Execution via Injected Legal AI Provider
     const provider = getLegalAiProvider();
     const rawAnalysis = await provider.analyzeDocument(sanitizedText);
 
@@ -109,9 +137,13 @@ export async function POST(req: NextRequest) {
       },
     };
 
+    // Populate O(1) response cache for subsequent identical requests
+    documentAnalysisCache.set(cacheKey, responseData);
+
     return NextResponse.json(responseData, {
       status: 200,
       headers: {
+        'X-Cache': 'MISS',
         'Cache-Control': 'no-store, max-age=0',
         'Server-Timing': `ai;dur=${latencyMs}`,
         'X-RateLimit-Limit': String(rateLimit.limit),

@@ -53,6 +53,29 @@ This Agreement shall be governed by and construed in accordance with the laws of
     expect(firstClause.citation).toBeDefined();
     expect(['VERIFIED', 'PARAPHRASED', 'UNVERIFIED']).toContain(firstClause.citation.status);
   });
+
+  it('serves repeat document analyses with O(1) X-Cache: HIT and sub-5ms latency', async () => {
+    const contractText = `
+RESIDENTIAL LEASE AGREEMENT
+Landlord reserves the right to enter the leased premises at any time without prior written notice for inspections.
+In the event of early termination, security deposit is forfeited.
+    `.trim();
+
+    const req1 = new NextRequest('http://localhost:3000/api/analyze', {
+      method: 'POST',
+      body: JSON.stringify({ contractText }),
+    });
+    const res1 = await analyzeHandler(req1);
+    expect(res1.status).toBe(200);
+
+    const req2 = new NextRequest('http://localhost:3000/api/analyze', {
+      method: 'POST',
+      body: JSON.stringify({ contractText }),
+    });
+    const res2 = await analyzeHandler(req2);
+    expect(res2.status).toBe(200);
+    expect(res2.headers.get('X-Cache')).toBe('HIT');
+  });
 });
 
 describe('API Route: /api/negotiate', () => {

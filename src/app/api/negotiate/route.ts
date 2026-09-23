@@ -7,6 +7,7 @@ import { defaultRateLimiter } from '@/lib/security';
 import { getLegalAiProvider } from '@/lib/ai/factory';
 import { CounterProposal } from '@/lib/types';
 import { mapErrorToResponse } from '@/lib/apiError';
+import { negotiationCache, hashPayload } from '@/lib/cache';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -42,6 +43,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const cacheKey = hashPayload(`${body.clauseTitle}::${body.originalClause}::${body.potentialRisk || ''}`);
+    const cachedProposal = negotiationCache.get(cacheKey);
+    if (cachedProposal) {
+      const cacheLatency = Date.now() - startTime;
+      return NextResponse.json(
+        {
+          ...cachedProposal,
+          metadata: { ...cachedProposal.metadata, latencyMs: cacheLatency, cached: true },
+        },
+        {
+          status: 200,
+          headers: {
+            'X-Cache': 'HIT',
+            'Cache-Control': 'no-store, max-age=0',
+            'Server-Timing': `ai;dur=${cacheLatency};desc="cache-hit"`,
+            'X-RateLimit-Limit': String(rateLimit.limit),
+            'X-RateLimit-Remaining': String(rateLimit.remaining),
+          },
+        }
+      );
+    }
+
     const provider = getLegalAiProvider();
     const rawProposal = await provider.draftCounterProposal(
       String(body.clauseTitle).slice(0, 200),
@@ -65,9 +88,12 @@ export async function POST(req: NextRequest) {
       },
     };
 
+    negotiationCache.set(cacheKey, responseData);
+
     return NextResponse.json(responseData, {
       status: 200,
       headers: {
+        'X-Cache': 'MISS',
         'Cache-Control': 'no-store, max-age=0',
         'Server-Timing': `ai;dur=${latencyMs}`,
         'X-RateLimit-Limit': String(rateLimit.limit),

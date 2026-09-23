@@ -8,6 +8,7 @@ import { getLegalAiProvider } from '@/lib/ai/factory';
 import { IndexedDocumentVerifier } from '@/lib/groundingVerifier';
 import { GroundedCitation } from '@/lib/types';
 import { mapErrorToResponse } from '@/lib/apiError';
+import { chatCache, hashPayload } from '@/lib/cache';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -59,6 +60,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const cacheKey = hashPayload(`${validation.sanitized}::${question}`);
+    const cachedChat = chatCache.get(cacheKey);
+    if (cachedChat) {
+      const cacheLatency = Date.now() - startTime;
+      return NextResponse.json(
+        { ...cachedChat, timestamp: new Date().toISOString(), cached: true },
+        {
+          status: 200,
+          headers: {
+            'X-Cache': 'HIT',
+            'Cache-Control': 'no-store, max-age=0',
+            'Server-Timing': `ai;dur=${cacheLatency};desc="cache-hit"`,
+            'X-RateLimit-Limit': String(rateLimit.limit),
+            'X-RateLimit-Remaining': String(rateLimit.remaining),
+          },
+        }
+      );
+    }
+
     const provider = getLegalAiProvider();
     const rawAnswer = await provider.answerQuestion(validation.sanitized, question);
 
@@ -70,24 +90,26 @@ export async function POST(req: NextRequest) {
 
     const latencyMs = Date.now() - startTime;
 
-    return NextResponse.json(
-      {
-        answer: rawAnswer.answer,
-        citations,
-        engineName: provider.engineName,
-        isDemo: provider.isDemo,
-        timestamp: new Date().toISOString(),
+    const chatResponse = {
+      answer: rawAnswer.answer,
+      citations,
+      engineName: provider.engineName,
+      isDemo: provider.isDemo,
+      timestamp: new Date().toISOString(),
+    };
+
+    chatCache.set(cacheKey, chatResponse);
+
+    return NextResponse.json(chatResponse, {
+      status: 200,
+      headers: {
+        'X-Cache': 'MISS',
+        'Cache-Control': 'no-store, max-age=0',
+        'Server-Timing': `ai;dur=${latencyMs}`,
+        'X-RateLimit-Limit': String(rateLimit.limit),
+        'X-RateLimit-Remaining': String(rateLimit.remaining),
       },
-      {
-        status: 200,
-        headers: {
-          'Cache-Control': 'no-store, max-age=0',
-          'Server-Timing': `ai;dur=${latencyMs}`,
-          'X-RateLimit-Limit': String(rateLimit.limit),
-          'X-RateLimit-Remaining': String(rateLimit.remaining),
-        },
-      }
-    );
+    });
   } catch (error: unknown) {
     console.error('Error in /api/chat:', error);
     const { message, statusCode } = mapErrorToResponse(error);
