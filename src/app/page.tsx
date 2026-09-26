@@ -527,7 +527,7 @@ export default function Home() {
                 ClauseGuard
               </span>
               <span 
-                className="text-[10px] tracking-widest font-mono font-semibold px-2 py-0.5 rounded-full uppercase"
+                className="text-[10px] tracking-widest font-mono font-semibold px-2 py-0.5 rounded-full uppercase whitespace-nowrap"
                 style={{ 
                   backgroundColor: 'rgba(43, 117, 116, 0.3)', 
                   color: '#E2E2E0',
@@ -536,11 +536,8 @@ export default function Home() {
               >
                 AI Legal Engine v2.1
               </span>
-              <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                ⚡ HIGH EFFICIENCY
-              </span>
             </div>
-            <div className="text-[10px] tracking-tight text-[#E2E2E0]/60 font-mono hidden sm:block">
+            <div className="text-[10px] tracking-tight text-[#E2E2E0]/60 font-mono hidden sm:block whitespace-nowrap">
               STATUTORY BENCHMARK • INVERTED-INDEX GROUNDING • SHA-256 RESPONSE CACHE
             </div>
           </div>
