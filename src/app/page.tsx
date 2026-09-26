@@ -522,17 +522,26 @@ export default function Home() {
           </div>
 
           <div>
-            <div className="flex items-center gap-2.5">
-              <span className="font-serif tracking-wide text-base font-bold text-[#E2E2E0] whitespace-nowrap">
+            <div className="flex items-center gap-2">
+              <span className="font-serif tracking-wide text-base font-bold text-[#E2E2E0]">
                 ClauseGuard
               </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-medium px-2.5 py-0.5 rounded-full bg-[#12484C] text-[#E2E2E0] border border-[#2B7574]/40 whitespace-nowrap shadow-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
-                v2.1 • Legal Engine
+              <span 
+                className="text-[10px] tracking-widest font-mono font-semibold px-2 py-0.5 rounded-full uppercase"
+                style={{ 
+                  backgroundColor: 'rgba(43, 117, 116, 0.3)', 
+                  color: '#E2E2E0',
+                  border: '1px solid rgba(43, 117, 116, 0.5)'
+                }}
+              >
+                AI Legal Engine v2.1
+              </span>
+              <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                ⚡ HIGH EFFICIENCY
               </span>
             </div>
-            <div className="text-[10px] text-[#E2E2E0]/60 font-mono hidden sm:block whitespace-nowrap mt-0.5">
-              Statutory Benchmark • Grounded Verification • Fast AST Cache
+            <div className="text-[10px] tracking-tight text-[#E2E2E0]/60 font-mono hidden sm:block">
+              STATUTORY BENCHMARK • INVERTED-INDEX GROUNDING • SHA-256 RESPONSE CACHE
             </div>
           </div>
         </div>
