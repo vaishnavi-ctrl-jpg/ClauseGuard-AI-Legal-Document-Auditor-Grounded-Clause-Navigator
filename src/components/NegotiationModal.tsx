@@ -151,27 +151,28 @@ export const NegotiationModal: React.FC<NegotiationModalProps> = ({
 
   return (
     <div
-      className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto")}
+      className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto")}
       role="dialog"
       aria-modal="true"
       aria-labelledby="counter-modal-title"
     >
       <div
         ref={modalRef}
-        className={cn("bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full p-6 space-y-5 my-8 max-h-[90vh] overflow-y-auto")}
+        className={cn("bg-[#12484C] text-[#E2E2E0] rounded-2xl border border-[#2B7574]/50 shadow-2xl max-w-2xl w-full p-6 space-y-5 my-8 max-h-[90vh] overflow-y-auto font-sans")}
+        style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)' }}
       >
         {/* Modal Header */}
-        <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+        <div className="flex items-start justify-between border-b border-[#2B7574]/30 pb-4">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-[#2B7574]/25 text-[#2B7574] border border-[#2B7574]/40 flex items-center justify-center">
               <Sparkles className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h2 id="counter-modal-title" className="text-lg font-bold text-slate-900">
+              <h2 id="counter-modal-title" className="text-lg font-serif font-bold text-[#E2E2E0]">
                 Counter-Proposal & Negotiation Drafter
               </h2>
-              <p className="text-xs text-slate-500">
-                Targeted clause: <span className="font-semibold text-slate-700">{clause.title}</span>
+              <p className="text-xs text-[#E2E2E0]/70 font-mono">
+                Targeted clause: <span className="font-semibold text-[#2B7574]">{clause.title}</span>
               </p>
             </div>
           </div>
@@ -179,7 +180,7 @@ export const NegotiationModal: React.FC<NegotiationModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+            className="p-1.5 rounded-lg text-[#E2E2E0]/60 hover:text-[#E2E2E0] hover:bg-[#0E2931] border border-transparent hover:border-[#2B7574]/30 transition cursor-pointer"
             aria-label="Close negotiation modal"
           >
             <X className="w-5 h-5" aria-hidden="true" />
@@ -189,25 +190,25 @@ export const NegotiationModal: React.FC<NegotiationModalProps> = ({
         {/* Content Area */}
         {loading ? (
           <div className="py-12 flex flex-col items-center justify-center space-y-3" aria-live="polite">
-            <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm font-medium text-slate-600">Drafting balanced legal counter-proposal...</p>
-            <p className="text-xs text-slate-400">Synthesizing mutual notice windows and fair liability caps</p>
+            <div className="w-8 h-8 border-3 border-[#2B7574] border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm font-medium text-[#E2E2E0]">Drafting balanced legal counter-proposal...</p>
+            <p className="text-xs text-[#E2E2E0]/60 font-mono">Synthesizing mutual notice windows and fair liability caps</p>
           </div>
         ) : error ? (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm" role="alert">
+          <div className="p-4 rounded-xl bg-[#861211]/25 border border-[#861211]/60 text-red-200 text-sm font-mono" role="alert">
             <p className="font-bold">Error drafting proposal</p>
             <p className="text-xs mt-1">{error}</p>
           </div>
         ) : proposal ? (
           <div className="space-y-4">
             {/* Metadata Badge */}
-            <div className="flex items-center justify-between text-xs bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-              <div className="flex items-center gap-1.5 text-slate-600">
-                <ShieldCheck className="w-4 h-4 text-indigo-600" aria-hidden="true" />
-                <span>Engine: <strong>{proposal.metadata.engineName}</strong></span>
+            <div className="flex items-center justify-between text-xs bg-[#0E2931] p-2.5 rounded-xl border border-[#2B7574]/30 font-mono">
+              <div className="flex items-center gap-1.5 text-[#E2E2E0]/80">
+                <ShieldCheck className="w-4 h-4 text-[#2B7574]" aria-hidden="true" />
+                <span>Engine: <strong className="text-[#2B7574]">{proposal.metadata.engineName}</strong></span>
               </div>
-              <div className="flex items-center gap-1 text-slate-500 font-mono">
-                <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+              <div className="flex items-center gap-1 text-[#E2E2E0]/60 font-mono">
+                <Clock className="w-3.5 h-3.5 text-[#2B7574]" aria-hidden="true" />
                 <span>{proposal.metadata.latencyMs}ms</span>
               </div>
             </div>
@@ -215,29 +216,29 @@ export const NegotiationModal: React.FC<NegotiationModalProps> = ({
             {/* Proposed Fair Revision */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label htmlFor="revised-clause" className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                <label htmlFor="revised-clause" className="text-xs font-mono font-bold uppercase tracking-wider text-[#2B7574]">
                   Proposed Balanced Replacement Clause
                 </label>
                 <button
                   type="button"
                   onClick={() => copyToClipboard(proposal.revisedFairClause, 'clause')}
-                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1"
+                  className="text-xs font-mono font-semibold text-[#2B7574] hover:text-emerald-300 inline-flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   {copiedClause ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedClause ? 'Copied' : 'Copy Clause'}</span>
                 </button>
               </div>
-              <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-emerald-950 font-mono text-xs leading-relaxed">
+              <div className="p-3.5 rounded-xl bg-[#0E2931]/90 border border-emerald-500/40 text-emerald-300 font-mono text-xs leading-relaxed shadow-inner">
                 {proposal.revisedFairClause}
               </div>
             </div>
 
             {/* Negotiation Rationale */}
             <div className="space-y-1">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#2B7574]">
                 Why this is Reasonable & Standard
               </h3>
-              <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <p className="text-xs text-[#E2E2E0]/85 leading-relaxed bg-[#0E2931] p-3.5 rounded-xl border border-[#2B7574]/30 font-sans">
                 {proposal.rationale}
               </p>
             </div>
@@ -245,20 +246,20 @@ export const NegotiationModal: React.FC<NegotiationModalProps> = ({
             {/* Ready-to-Send Email Draft */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1">
-                  <Send className="w-3.5 h-3.5 text-indigo-600" aria-hidden="true" />
+                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#2B7574] flex items-center gap-1.5">
+                  <Send className="w-3.5 h-3.5 text-[#2B7574]" aria-hidden="true" />
                   <span>Ready-to-Send Email to Counterparty</span>
                 </h3>
                 <button
                   type="button"
                   onClick={() => copyToClipboard(proposal.readyToSendDraft, 'draft')}
-                  className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition"
+                  className="inline-flex items-center gap-1 text-xs font-mono font-bold px-3 py-1.5 rounded-lg bg-[#861211] text-[#E2E2E0] hover:bg-[#a21715] border border-[#861211]/60 transition shadow-sm cursor-pointer"
                 >
                   {copiedDraft ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedDraft ? 'Copied to Clipboard!' : 'Copy Email'}</span>
                 </button>
               </div>
-              <pre className="p-3.5 rounded-xl bg-slate-900 text-slate-100 font-sans text-xs leading-relaxed whitespace-pre-wrap border border-slate-800 selection:bg-indigo-600">
+              <pre className="p-3.5 rounded-xl bg-[#0E2931] text-[#E2E2E0] font-sans text-xs leading-relaxed whitespace-pre-wrap border border-[#2B7574]/40">
                 {proposal.readyToSendDraft}
               </pre>
             </div>
@@ -266,11 +267,11 @@ export const NegotiationModal: React.FC<NegotiationModalProps> = ({
         ) : null}
 
         {/* Modal Footer */}
-        <div className="flex justify-end pt-3 border-t border-slate-100">
+        <div className="flex justify-end pt-3 border-t border-[#2B7574]/30">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
+            className="px-4 py-2 text-xs font-mono font-bold text-[#E2E2E0] bg-[#0E2931] hover:bg-[#2B7574]/30 border border-[#2B7574]/40 rounded-xl transition cursor-pointer"
           >
             Close
           </button>
